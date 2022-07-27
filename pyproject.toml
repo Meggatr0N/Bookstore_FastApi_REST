@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "bookstore_fastapi"
+version = "0.1.0"
+description = ""
+authors = ["ArtB <bobkoart@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.79.0"
+SQLAlchemy = "^1.4.39"
+psycopg2-binary = "^2.9.3"
+uvicorn = "^0.18.2"
+python-dotenv = "^0.20.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+mypy = "^0.971"
+sqlalchemy-stubs = "^0.4"
+flake8 = "^4.0.1"
+autoflake = "^1.4"
+isort = "^5.10.1"
+black = "^22.6.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

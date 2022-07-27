@@ -1,0 +1,5 @@
+# Environments
+.env
+.idea
+__pycache__/
+
