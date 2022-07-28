@@ -1,5 +1,10 @@
+
 # Environments
 .env
+
+
 .idea
 __pycache__/
+.vscode
+.mypy_cache
 
