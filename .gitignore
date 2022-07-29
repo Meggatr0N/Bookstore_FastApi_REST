@@ -8,3 +8,6 @@ __pycache__/
 .vscode
 .mypy_cache
 
+
+# Files for copied code
+trash.py

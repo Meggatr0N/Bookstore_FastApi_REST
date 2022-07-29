@@ -4,7 +4,7 @@ from pydantic import BaseSettings, PostgresDsn, validator
 
 
 class Settings(BaseSettings):
-    API_V1_STR: str = "/api/v1"
+    API_V1_STR: str = ""  # "/api/v1"
 
     POSTGRES_SERVER: str
     POSTGRES_USER: str

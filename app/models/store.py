@@ -5,16 +5,36 @@ from sqlalchemy import (
     Column,
     Text,
     Float,
-    # ForeignKey,
+    ForeignKey,
 )
-
+from sqlalchemy.orm import relationship
 from app.database.db import Base
 
 
-# class Category(Base):
-#     __tablename__ = "categories"
-# class Author(Base):
-#     __tablename__ = "authors"
+class Category(Base):
+    __tablename__ = "categories"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), nullable=False, unique=True)
+    is_active = Column(Boolean, default=True)
+
+    books = relationship("Book", back_populates="category")
+
+    def __repr__(self):
+        return f"Category name: {self.name}"
+
+
+class Author(Base):
+    __tablename__ = "authors"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), nullable=False, unique=True)
+    email = Column(String(255), nullable=False)
+
+    books = relationship("Book", back_populates="author")
+
+    def __repr__(self):
+        return f"Author name: {self.name}"
 
 
 class Book(Base):
@@ -24,38 +44,12 @@ class Book(Base):
     name = Column(String(255), nullable=False, unique=True)
     price = Column(Float, nullable=False)
     description = Column(Text)
-    is_active = Column(Boolean, default=False)
+    is_active = Column(Boolean)
+    author_id = Column(Integer, ForeignKey("authors.id"))
+    category_id = Column(Integer, ForeignKey("categories.id"))
 
-    # author_id = Column(Integer, ForeignKey("parent.id"), nullable=False)
-    # category_id = Column(Integer, ForeignKey("parent.id"), nullable=False)
+    author = relationship("Author", back_populates="books")
+    category = relationship("Category", back_populates="books")
 
     def __repr__(self):
         return f"Book name: {self.name}"
-
-
-# from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
-# from sqlalchemy.orm import relationship
-#
-# from .database import Base
-#
-#
-# class User(Base):
-#     __tablename__ = "users"
-#
-#     id = Column(Integer, primary_key=True, index=True)
-#     email = Column(String, unique=True, index=True)
-#     hashed_password = Column(String)
-#     is_active = Column(Boolean, default=True)
-#
-#     items = relationship("Item", back_populates="owner")
-#
-#
-# class Item(Base):
-#     __tablename__ = "items"
-#
-#     id = Column(Integer, primary_key=True, index=True)
-#     title = Column(String, index=True)
-#     description = Column(String, index=True)
-#     owner_id = Column(Integer, ForeignKey("users.id"))
-#
-#     owner = relationship("User", back_populates="items")

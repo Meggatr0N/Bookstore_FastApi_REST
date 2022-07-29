@@ -1,58 +1,112 @@
 from pydantic import BaseModel
 
 
-class Book(BaseModel):
-    id: int
+class BookBase(BaseModel):
     name: str
     price: float
     description: str
     is_active: bool
-    # author_id: int
-    # category_id: int
+
+
+class AuthorBase(BaseModel):
+    name: str
+    email: str
+
+
+class CategoryBase(BaseModel):
+    name: str
+
+
+class BookCreate(BookBase):
+    author_id: int = 1
+    category_id: int = 1
 
     class Config:
         orm_mode = True
 
 
-class CreatedBook(BaseModel):
-    name: str
-    price: float
-    description: str
+class AuthorCreate(AuthorBase):
+    pass
+
+
+class Book(BookBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+
+class CategoryCreate(CategoryBase):
     is_active: bool
 
 
-# from pydantic import BaseModel
-#
-#
-# class ItemBase(BaseModel):
-#     title: str
-#     description: str | None = None
-#
-#
-# class ItemCreate(ItemBase):
-#     pass
-#
-#
-# class Item(ItemBase):
-#     id: int
-#     owner_id: int
-#
-#     class Config:
-#         orm_mode = True
-#
-#
-# class UserBase(BaseModel):
-#     email: str
-#
-#
-# class UserCreate(UserBase):
-#     password: str
-#
-#
-# class User(UserBase):
-#     id: int
-#     is_active: bool
-#     items: list[Item] = []
-#
-#     class Config:
-#         orm_mode = True
+class Author(AuthorBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+
+class Category(CategoryBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+
+class BookItem(Book):
+    author: Author | None
+    category: Category | None
+
+
+class AuthorItem(Author):
+    books: list[Book] = []
+
+
+class BookForCategoryItem(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        orm_mode = True
+
+
+class CategoryItem(Category):
+    is_active: bool
+    books: list[BookForCategoryItem] = []
+
+    class Config:
+        orm_mode = True
+
+
+"""
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""
+
+
+class UserBase(BaseModel):
+    name: str
+    email: str
+
+
+class UserCreate(UserBase):
+    password: str
+
+
+class User(UserBase):
+    id: int
+
+    class Config:
+        orm_mode = True

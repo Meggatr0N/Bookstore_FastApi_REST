@@ -11,6 +11,7 @@ SQLAlchemy = "^1.4.39"
 psycopg2-binary = "^2.9.3"
 uvicorn = "^0.18.2"
 python-dotenv = "^0.20.0"
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

@@ -1,111 +1,155 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from app.models import store
 from app.schemas import schemas
 
-# from . import models, schemas
 from app.api.dependb import get_db
+from app.crud import store_logic
 
-# from .config import settings
 
 router = APIRouter()
 
+# ---------------------------------------------------------------------------------------
+# Book routers
+# ---------------------------------------------------------------------------------------
+
 
 @router.get(
-    "/books", response_model=list[schemas.Book], status_code=status.HTTP_200_OK
+    "/books",
+    response_model=list[schemas.BookItem],
+    status_code=status.HTTP_200_OK,
+    tags=["Book"],
 )
 def get_all_books(
-    db: Session = Depends(get_db), skip: int = 0, limit: int = 100
+    db: Session = Depends(get_db), offset: int = 0, limit: int = 100
 ):
-    books = db.query(store.Book).offset(skip).limit(limit).all()
-    return books
+    return store_logic.get_all_items(
+        db=db, offset=offset, limit=limit, item_model=store.Book
+    )
 
 
 @router.post(
-    "/books", response_model=schemas.Book, status_code=status.HTTP_201_CREATED
+    "/books",
+    response_model=schemas.BookItem,
+    status_code=status.HTTP_201_CREATED,
+    tags=["Book"],
 )
-def create_book(book: schemas.CreatedBook, db: Session = Depends(get_db)):
-    db_item = db.query(store.Book).filter(store.Book.name == book.name).first()
-    if db_item is not None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Book with name:'{book.name}' already exists",
-        )
-
-    new_book = store.Book(
-        name=book.name,
-        price=book.price,
-        description=book.description,
-        is_active=book.is_active,
-    )
-
-    db.add(new_book)
-    db.commit()
-    db.refresh(new_book)
-    return new_book
+def create_book(book: schemas.BookCreate, db: Session = Depends(get_db)):
+    return store_logic.create_item(item=book, db=db, item_model=store.Book)
 
 
 @router.get(
     "/books/{book_id}",
-    response_model=schemas.Book,
+    response_model=schemas.BookItem,
     status_code=status.HTTP_200_OK,
+    tags=["Book"],
 )
 def get_book_by_id(book_id: int, db: Session = Depends(get_db)):
-    book = db.query(store.Book).filter(store.Book.id == book_id).first()
-
-    if not book:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Book with ID {book_id} not found",
-        )
-
-    return book
+    return store_logic.get_item_by_id(
+        item_id=book_id, db=db, item_model=store.Book
+    )
 
 
 @router.put(
     "/books/{book_id}",
-    response_model=schemas.Book,
-    status_code=status.HTTP_200_OK,
+    response_model=schemas.BookItem,
+    status_code=status.HTTP_202_ACCEPTED,
+    tags=["Book"],
 )
 def update_book_by_id(
-    book_id: int, book: schemas.Book, db: Session = Depends(get_db)
+    book_id: int, book: schemas.BookCreate, db: Session = Depends(get_db)
 ):
-    book_to_update = (
-        db.query(store.Book).filter(store.Book.id == book_id).first()
+    return store_logic.update_item_by_id(
+        item_id=book_id, db=db, schema=book, item_model=store.Book
     )
-
-    if not book_to_update:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Book with ID {book_id} not found",
-        )
-
-    book_to_update.name = book.name
-    book_to_update.price = book.price
-    book_to_update.description = book.description
-    book_to_update.is_active = book.is_active
-
-    db.commit()
-    db.refresh(book_to_update)
-
-    return book_to_update
 
 
 # mb use status code 204, but it doesn't return deleted object
-@router.delete("/books/{book_id}", status_code=status.HTTP_200_OK)
+@router.delete(
+    "/books/{book_id}", status_code=status.HTTP_200_OK, tags=["Book"]
+)
 def delete_book_by_id(book_id: int, db: Session = Depends(get_db)):
-    book_to_delete = (
-        db.query(store.Book).filter(store.Book.id == book_id).first()
+    return store_logic.delete_item_by_id(
+        item_id=book_id, db=db, item_model=store.Book
     )
 
-    if not book_to_delete:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Book with ID {book_id} not found",
-        )
 
-    db.delete(book_to_delete)
-    db.commit()
+# ---------------------------------------------------------------------------------------
+# Categories routers
+# ---------------------------------------------------------------------------------------
 
-    return {"detail": "Book deleted successfully", "Book": book_to_delete}
+
+@router.get(
+    "/categories",
+    response_model=list[schemas.CategoryItem],
+    status_code=status.HTTP_200_OK,
+    tags=["Category"],
+)
+def get_all_categories(
+    db: Session = Depends(get_db), offset: int = 0, limit: int = 100
+):
+    return store_logic.get_all_items(
+        db=db, offset=offset, limit=limit, item_model=store.Category
+    )
+
+
+@router.post(
+    "/categories",
+    response_model=schemas.CategoryItem,
+    status_code=status.HTTP_201_CREATED,
+    tags=["Category"],
+)
+def create_category(
+    category: schemas.CategoryCreate, db: Session = Depends(get_db)
+):
+    return store_logic.create_item(
+        item=category, db=db, item_model=store.Category
+    )
+
+
+@router.get(
+    "/categories/{category_id}",
+    response_model=schemas.CategoryItem,
+    status_code=status.HTTP_200_OK,
+    tags=["Category"],
+)
+def get_category_by_id(category_id: int, db: Session = Depends(get_db)):
+    return store_logic.get_item_by_id(
+        item_id=category_id, db=db, item_model=store.Category
+    )
+
+
+@router.put(
+    "/categories/{category_id}",
+    response_model=schemas.CategoryItem,
+    status_code=status.HTTP_202_ACCEPTED,
+    tags=["Category"],
+)
+def update_category_by_id(
+    category_id: int,
+    category: schemas.CategoryCreate,
+    db: Session = Depends(get_db),
+):
+    return store_logic.update_item_by_id(
+        item_id=category_id,
+        db=db,
+        request_item=category,
+        item_model=store.Category,
+    )
+
+
+@router.delete(
+    "/categories/{category_id}",
+    status_code=status.HTTP_200_OK,
+    tags=["Category"],
+)
+def delete_category_by_id(category_id: int, db: Session = Depends(get_db)):
+    return store_logic.delete_item_by_id(
+        item_id=category_id, db=db, item_model=store.Category
+    )
+
+
+# ---------------------------------------------------------------------------------------
+# Author routers
+# ---------------------------------------------------------------------------------------
