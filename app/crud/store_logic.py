@@ -38,9 +38,7 @@ def get_item_by_id(item_id: int, db: Session, item_model: Base):
     return item
 
 
-def update_item_by_id(
-    item_id: int, db: Session, request_item, item_model: Base
-):
+def update_item_by_id(item_id: int, db: Session, schema, item_model: Base):
     item_to_update = (
         db.query(item_model).filter(item_model.id == item_id).first()
     )
@@ -51,11 +49,14 @@ def update_item_by_id(
             detail=f"{item_model.__name__} with ID {item_id} not found",
         )
 
-    for keyy, value in jsonable_encoder(request_item).items():
+    for keyy, value in jsonable_encoder(schema).items():
         if keyy != "id":
             db.query(item_model).filter(item_model.id == item_id).update(
                 {keyy: value}
             )
+    # db.query(item_model).filter(item_model.id == id).update(dict(schema))
+    db.commit()
+    db.refresh(item_to_update)
 
     return item_to_update
 

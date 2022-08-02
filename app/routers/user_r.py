@@ -1,23 +1,23 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app import models
-from app.schemas import schemas
+from app.models import user_m
+from app.schemas import user_s
 
 # from . import models, schemas
-from app.api.dependb import get_db
+from app.database.dependb import get_db
 
-from app.core.security import Hash
+from app.core import security
 
 router = APIRouter()
 
 
-@router.post("/user", response_model=schemas.User)
-def create_user(request: schemas.UserCreate, db: Session = Depends(get_db)):
-    new_user = models.user.User(
+@router.post("/user", response_model=user_s.User)
+def create_user(request: user_s.UserCreate, db: Session = Depends(get_db)):
+    new_user = user_m.User(
         name=request.name,
         email=request.email,
-        password=Hash.bcrypt(request.password),
+        password=security.get_hashed_password(request.password),
     )
     db.add(new_user)
     db.commit()
@@ -25,13 +25,9 @@ def create_user(request: schemas.UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 
-@router.get("/user/{user_id}", response_model=schemas.User)
+@router.get("/user/{user_id}", response_model=user_s.User)
 def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
-    user = (
-        db.query(models.user.User)
-        .filter(models.user.User.id == user_id)
-        .first()
-    )
+    user = db.query(user_m.User).filter(user_m.User.id == user_id).first()
 
     if not user:
         raise HTTPException(
