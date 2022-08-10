@@ -1,11 +1,18 @@
 from typing import Any, Dict, Optional
-
+import os
 from pydantic import BaseSettings, PostgresDsn, validator
 
 
 class Settings(BaseSettings):
+    # url settings
     API_V1_STR: str = ""  # "/api/v1"
 
+    # jwt / authentication
+    ACCESS_TOKEN_EXPIRES_MINUTES: int
+    SECRET_JWT_KEY: str
+    JWT_ALGORITHM: str
+
+    # Postgress launch
     POSTGRES_SERVER: str
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str

@@ -1,42 +1,27 @@
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-
-from app.database.dependb import get_db
 from fastapi.security import OAuth2PasswordRequestForm
 
-# from app.crud import store_logic
-from app.models import user_m
-from app.core import security
+from app.database.dependb import get_db
+from app.crud import auth_logic
 
-from app.schemas import authentication_s
 
 router = APIRouter(tags=["Authentication"])
 
 
 @router.post("/login")
 def login(
-    # schema: authentication_s.Login,
     schema: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db),
 ):
-    user = (
-        db.query(user_m.User)
-        .filter(user_m.User.email == schema.username)
-        .first()
-    )
+    """
+    Authentication form.
+    It creates the following Form request parameters in your endpoint.
 
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-        )
+    * Username = must be the user's email address.
+    * Password = password.
 
-    if not security.verify_password(schema.password, user.password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-        )
-
-    # generate JWT token
-    access_token = security.create_access_token(data={"sub": user.email})
-    return {"access_token": access_token, "token_type": "bearer"}
+    Returns an access token that the browser will use to access some routs.
+    Token expires for 60m * 24h* 7d = 10,080m (7days)
+    """
+    return auth_logic.verify_login(db=db, schema=schema)
