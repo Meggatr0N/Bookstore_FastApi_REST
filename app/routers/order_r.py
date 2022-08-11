@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status, Query
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from datetime import date
 
@@ -31,14 +31,14 @@ def get_all_orders(
     date_from: date | None = None,
     date_to: date | None = None,
     complete: bool | None = None,
-    current_user: dict = Depends(security.get_current_user),
+    current_user: dict = Depends(security.auth_access_wrapper),
 ):
     """
     Get all orders.
 
         Need authentication and special permissions.
 
-        Only a user who has ('is_staff', 'is_superuser') can get access.
+        Only a user who has role='staff' or role='admin' can get access.
 
     You can use query parameters to get some specific information as:
     * latest_first...   True shows list  from end to start
@@ -50,7 +50,7 @@ def get_all_orders(
 
         Delivery date example ('2000-01-01' Year/month/day)
     """
-    if security.check_permision(current_user, bottom_perm="is_staff"):
+    if security.check_permision(current_user, bottom_perm="staff"):
         return order_logic.get_all_orders(
             db=db,
             page=page,
@@ -78,7 +78,7 @@ def get_all_orders(
 def create_order(
     order: user_order_s.OrderCreate,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(security.get_current_user),
+    current_user: dict = Depends(security.auth_access_wrapper),
 ):
     """
     Create order.
@@ -114,17 +114,17 @@ def create_order(
 def get_order_by_id(
     order_id: int,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(security.get_current_user),
+    current_user: dict = Depends(security.auth_access_wrapper),
 ):
     """
     Get order by id.
 
         Need authentication and special permissions.
 
-        Only a user who has ('is_staff', 'is_superuser') can get access.
+        Only a user who has role='staff' or role='admin' can get access.
     """
 
-    if security.check_permision(current_user, bottom_perm="is_staff"):
+    if security.check_permision(current_user, bottom_perm="staff"):
         return author_category_logic.get_item_by_id(
             item_id=order_id,
             db=db,
@@ -146,15 +146,15 @@ def update_order_by_id_by_staff(
     order_id: int,
     order: user_order_s.OrderUpdateByStaff,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(security.get_current_user),
+    current_user: dict = Depends(security.auth_access_wrapper),
 ):
     """
     Change order by id.
 
         Need authentication and special permissions.
 
-        Users who has ('is_staff', 'is_superuser')
-        permissions can change as well.
+        Users who has role='staff' or role='admin' can change as well.
+
 
 
     The logic is when the user pays for the order staff will
@@ -185,7 +185,7 @@ def update_order_by_id_by_staff(
 
         "2000-01-01" (year, month, day)
     """
-    if security.check_permision(current_user, bottom_perm="is_staff"):
+    if security.check_permision(current_user, bottom_perm="staff"):
         return order_logic.update_item_by_id_by_staff(
             item_id=order_id,
             db=db,
@@ -205,14 +205,14 @@ def update_order_by_id_by_staff(
 def delete_order_by_id(
     order_id: int,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(security.get_current_user),
+    current_user: dict = Depends(security.auth_access_wrapper),
 ):
     """
     Delete order by id.
 
         Need authentication and special permissions.
     """
-    if security.check_permision(current_user, bottom_perm="is_staff"):
+    if security.check_permision(current_user, bottom_perm="staff"):
         return author_category_logic.delete_item_by_id(
             item_id=order_id,
             db=db,
@@ -233,7 +233,7 @@ def delete_order_by_id(
 def update_own_last_order_by_current_user(
     order: user_order_s.OrderUpdateByUserHimself,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(security.get_current_user),
+    current_user: dict = Depends(security.auth_access_wrapper),
 ):
     """
     Change last order of current_user by himself.

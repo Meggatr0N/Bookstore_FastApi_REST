@@ -18,7 +18,7 @@ class Category(Base):
     name = Column(String(64), nullable=False, unique=True)
     is_active = Column(Boolean, default=True)
 
-    books = relationship("Book", back_populates="category")
+    # books = relationship("Book", back_populates="category")
 
     def __repr__(self):
         return f"Category name: {self.name}"
@@ -31,10 +31,10 @@ class Author(Base):
     name = Column(String(64), nullable=False, unique=True)
     email = Column(String(64), nullable=False)
 
-    books = relationship("Book", back_populates="author")
+    # books = relationship("Book", back_populates="author")
 
     def __repr__(self):
-        return f"Author name: {self.fullname}"
+        return f"Author name: {self.name}"
 
 
 class Book(Base):
@@ -46,11 +46,16 @@ class Book(Base):
     description = Column(Text)
     year_of_publication = Column(Integer)
     is_active = Column(Boolean)
+
     author_id = Column(Integer, ForeignKey("authors.id"))
     category_id = Column(Integer, ForeignKey("categories.id"))
 
-    author = relationship("Author", back_populates="books")
-    category = relationship("Category", back_populates="books")
+    author = relationship(
+        "Author", backref="books"
+    )  # , back_populates="books")
+    category = relationship(
+        "Category", backref="books"
+    )  # , back_populates="books")
 
     def __repr__(self):
-        return f"Book title: {self.title}"
+        return f"Book title: {self.name}"

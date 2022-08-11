@@ -61,14 +61,12 @@ class OrderUpdateByUserHimself(BaseModel):
 
 
 class UserPermissionChange(BaseModel):
-    is_staff: bool | None
-    is_superuser: bool | None
+    role: str
 
     class Config:
         schema_extra = {
             "example": {
-                "is_staff": "False",
-                "is_superuser": "False",
+                "role": "user",
             }
         }
 
@@ -112,8 +110,7 @@ class UserInListOfUsersShow(BaseModel):
     id: int
     fullname: str
     email: str
-    is_staff: bool
-    is_superuser: bool
+    role: str
 
     class Config:
         orm_mode = True
@@ -122,8 +119,7 @@ class UserInListOfUsersShow(BaseModel):
                 "id": "7",
                 "fullname": "Example User",
                 "email": "exampleuser@gmail.com",
-                "is_staff": "False",
-                "is_superuser": "False",
+                "role": "user",
             }
         }
 
@@ -152,8 +148,7 @@ class UserFullShow(BaseModel):
     id: int
     fullname: str
     email: str
-    is_staff: bool
-    is_superuser: bool
+    role: str
     orders: list[OrderSmallShow] = []
 
     class Config:
@@ -163,8 +158,7 @@ class UserFullShow(BaseModel):
                 "id": "7",
                 "fullname": "Example User",
                 "email": "exampleuser@gmail.com",
-                "is_staff": "False",
-                "is_superuser": "False",
+                "role": "user",
                 "orders": [
                     {
                         "id": "12",
@@ -213,3 +207,26 @@ class OrderFullShow(BaseModel):
                 "complete": "False",
             }
         }
+
+        # {
+        #     "id": 2,
+        #     "total_price": 5.97,
+        #     "customer": {
+        #         "id": 1,
+        #         "fullname": "artem",
+        #         "email": "artem@gmail.com",
+        #     },
+        #     "paid": "False",
+        #     "delivery_date": null,
+        #     "complete": "False",
+        #     "order_items": [
+        #         {
+        #             "book_id": 3,
+        #             "quantity": 3,
+        #         },
+        #         {
+        #             "book_id": 3,
+        #             "quantity": 3,
+        #         },
+        #     ],
+        # }

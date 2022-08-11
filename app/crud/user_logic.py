@@ -6,42 +6,11 @@ from pydantic import BaseModel
 from app.database.db import Base
 from app.models import user_m
 from app.core import security
-from pydantic import EmailStr
 
 
-def create_user(
-    schema: BaseModel,
-    db: Session,
-):
-    # user existence check
-    user = (
-        db.query(user_m.User)
-        .filter(user_m.User.email == schema.email.lower())
-        .first()
-    )
-    if user:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Account already exist",
-        )
-
-    # checking passwords for matching
-    if schema.password != schema.passwordConfirm:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Passwords do not match",
-        )
-
-    new_user = user_m.User(
-        fullname=schema.fullname,
-        email=EmailStr(schema.email.lower()),
-        password=security.get_hashed_password(schema.password),
-    )
-
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return new_user
+# ---------------------------------------------------------------------------------------
+# get_all_users
+# ---------------------------------------------------------------------------------------
 
 
 def get_all_users(
@@ -50,8 +19,7 @@ def get_all_users(
     page: int,
     reverse_sort: bool,
     find_by_email: str,
-    find_staff: bool,
-    find_superuser: bool,
+    role: str,
 ):
     skip = (page - 1) * limit
     db_items = db.query(user_m.User)
@@ -69,14 +37,15 @@ def get_all_users(
         )
 
     # is user is staff
-    if find_staff is not None:
-        db_items = db_items.filter(user_m.User.is_staff == find_staff)
-
-    # is user is superuser
-    if find_superuser is not None:
-        db_items = db_items.filter(user_m.User.is_superuser == find_superuser)
+    if role is not None:
+        db_items = db_items.filter(user_m.User.role.like(f"%{role}%"))
 
     return db_items.limit(limit).offset(skip).all()
+
+
+# ---------------------------------------------------------------------------------------
+# get_one_user
+# ---------------------------------------------------------------------------------------
 
 
 def get_one_user(
@@ -92,6 +61,11 @@ def get_one_user(
         )
 
     return user
+
+
+# ---------------------------------------------------------------------------------------
+# change_user_by_superuser
+# ---------------------------------------------------------------------------------------
 
 
 def change_user_by_superuser(
@@ -129,6 +103,11 @@ def change_user_by_superuser(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="An order with such data already exists!",
         )
+
+
+# ---------------------------------------------------------------------------------------
+# change_user_by_himself
+# ---------------------------------------------------------------------------------------
 
 
 def change_user_by_himself(
@@ -173,7 +152,8 @@ def change_user_by_himself(
                     detail="Not enought data to change password!",
                 )
             else:
-                # checking if the entered password matches the one in the database
+                # checking if the entered password matches
+                # to the one in the database
                 if not security.verify_password(
                     data_to_update["old_password"], user_to_update.password
                 ):
@@ -217,6 +197,11 @@ def change_user_by_himself(
         )
 
 
+# ---------------------------------------------------------------------------------------
+# delete_user
+# ---------------------------------------------------------------------------------------
+
+
 def delete_user(
     user_id: int,
     db: Session,
@@ -224,7 +209,7 @@ def delete_user(
 ):
     # permision check
     if user_id == current_user.id or security.check_permision(
-        current_user, bottom_perm="is_staff"
+        current_user, bottom_perm="staff"
     ):
         # user existence check
         user_to_delete = (

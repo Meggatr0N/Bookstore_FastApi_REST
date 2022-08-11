@@ -62,16 +62,16 @@ def get_all_authors(
 def create_author(
     author: store_s.AuthorCreate,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(security.get_current_user),
+    current_user: dict = Depends(security.auth_access_wrapper),
 ):
     """
     Create author.
 
         Need authentication and special permissions.
 
-        Only a user who has ('is_staff', 'is_superuser') can get access.
+        Only a user who has role='staff' or role='admin' can get access.
     """
-    if security.check_permision(current_user, bottom_perm="is_staff"):
+    if security.check_permision(current_user, bottom_perm="staff"):
         return author_category_logic.create_item(
             item=author,
             db=db,
@@ -119,16 +119,16 @@ def update_author_by_id(
     author_id: int,
     author: store_s.AuthorChange,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(security.get_current_user),
+    current_user: dict = Depends(security.auth_access_wrapper),
 ):
     """
     Change author by id.
 
         Need authentication and special permissions.
 
-        Only a user who has ('is_staff', 'is_superuser') can get access.
+        Only a user who has role='staff' or role='admin' can get access.
     """
-    if security.check_permision(current_user, bottom_perm="is_staff"):
+    if security.check_permision(current_user, bottom_perm="staff"):
         return author_category_logic.update_item_by_id(
             item_id=author_id,
             db=db,
@@ -149,16 +149,16 @@ def update_author_by_id(
 def delete_author_by_id(
     author_id: int,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(security.get_current_user),
+    current_user: dict = Depends(security.auth_access_wrapper),
 ):
     """
     Delete author by id.
 
         Need authentication and special permissions.
 
-        Only a user who has ('is_staff', 'is_superuser') can get access.
+        Only a user who has role='staff' or role='admin' can get access.
     """
-    if security.check_permision(current_user, bottom_perm="is_staff"):
+    if security.check_permision(current_user, bottom_perm="staff"):
         return author_category_logic.delete_item_by_id(
             item_id=author_id,
             db=db,

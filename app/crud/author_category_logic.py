@@ -4,7 +4,6 @@ from pydantic import BaseModel
 from fastapi.encoders import jsonable_encoder
 
 from app.database.db import Base
-from app.models import store_m
 
 # ---------------------------------------------------------------------------------------
 # create_item

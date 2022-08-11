@@ -6,7 +6,10 @@ from datetime import date
 
 from app.database.db import Base
 from app.models import order_m, store_m
-from app.core import security
+
+# ---------------------------------------------------------------------------------------
+# get_all_orders
+# ---------------------------------------------------------------------------------------
 
 
 def get_all_orders(
@@ -61,6 +64,9 @@ def get_all_orders(
     return db_items.limit(limit).offset(skip).all()
 
 
+# ---------------------------------------------------------------------------------------
+# create_item
+# ---------------------------------------------------------------------------------------
 def create_item(
     item,
     db: Session,
@@ -89,6 +95,11 @@ def create_item(
     db.commit()
     db.refresh(new_item)
     return new_item
+
+
+# ---------------------------------------------------------------------------------------
+# update_last_order_by_user
+# ---------------------------------------------------------------------------------------
 
 
 def update_last_order_by_user(
@@ -166,6 +177,11 @@ def update_last_order_by_user(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="An order with such data already exists!",
         )
+
+
+# ---------------------------------------------------------------------------------------
+# update_item_by_id_by_staff
+# ---------------------------------------------------------------------------------------
 
 
 def update_item_by_id_by_staff(

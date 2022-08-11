@@ -17,7 +17,7 @@ router = APIRouter(tags=["Category"])
 
 @router.get(
     "/categories",
-    response_model=list[store_s.CategoryInListShow],
+    response_model=list[store_s.CategorySmallShow],
     status_code=status.HTTP_200_OK,
 )
 def get_all_categories(
@@ -63,16 +63,16 @@ def get_all_categories(
 def create_category(
     category: store_s.CategoryCreate,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(security.get_current_user),
+    current_user: dict = Depends(security.auth_access_wrapper),
 ):
     """
     Create category.
 
         Need authentication and special permissions.
 
-        Only a user who has ('is_staff', 'is_superuser') can get access.
+        Only a user who has role='staff' or role='admin' can get access.
     """
-    if security.check_permision(current_user, bottom_perm="is_staff"):
+    if security.check_permision(current_user, bottom_perm="staff"):
         return author_category_logic.create_item(
             item=category,
             db=db,
@@ -120,16 +120,16 @@ def update_category_by_id(
     category_id: int,
     category: store_s.CategoryChange,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(security.get_current_user),
+    current_user: dict = Depends(security.auth_access_wrapper),
 ):
     """
     Change category by id.
 
         Need authentication and special permissions.
 
-        Only a user who has ('is_staff', 'is_superuser') can get access.
+        Only a user who has role='staff' or role='admin' can get access.
     """
-    if security.check_permision(current_user, bottom_perm="is_staff"):
+    if security.check_permision(current_user, bottom_perm="staff"):
         return author_category_logic.update_item_by_id(
             item_id=category_id,
             db=db,
@@ -150,16 +150,16 @@ def update_category_by_id(
 def delete_category_by_id(
     category_id: int,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(security.get_current_user),
+    current_user: dict = Depends(security.auth_access_wrapper),
 ):
     """
     Delete category by id.
 
         Need authentication and special permissions.
 
-        Only a user who has ('is_staff', 'is_superuser') can get access.
+        Only a user who has role='staff' or role='admin' can get access.
     """
-    if security.check_permision(current_user, bottom_perm="is_staff"):
+    if security.check_permision(current_user, bottom_perm="staff"):
         return author_category_logic.delete_item_by_id(
             item_id=category_id,
             db=db,

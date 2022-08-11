@@ -99,7 +99,7 @@ class BookChange(BaseModel):
         }
 
 
-class CategoryInListShow(BaseModel):
+class CategorySmallShow(BaseModel):
     id: int
     name: str
     is_active: bool
@@ -111,20 +111,6 @@ class CategoryInListShow(BaseModel):
                 "id": "123",
                 "name": "Example category",
                 "is_active": "True",
-            }
-        }
-
-
-class CategorySmallShow(BaseModel):
-    id: int
-    name: str
-
-    class Config:
-        orm_mode = True
-        schema_extra = {
-            "example": {
-                "id": "123",
-                "name": "Example category",
             }
         }
 

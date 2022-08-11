@@ -24,60 +24,31 @@ def get_all_users(
     limit: int = 10,
     page: int = 1,
     email: str | None = None,
-    staff: bool | None = None,
-    superuser: bool | None = None,
+    role: str | None = None,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(security.get_current_user),
+    current_user: dict = Depends(security.auth_access_wrapper),
 ):
     """
     Get all users.
 
         Need authentication and special permissions.
 
-        Only a user who has ('is_staff', 'is_superuser') can get access.
+        Only a user who has role='staff' or role='admin' can get access.
 
     You can use query parameters to get some specific information as:
     * latest_first...   True shows list from end to start.
     * email... 'rt' shows every email that contains it
-    * staff... shows 'staff' Users
-    * superuser... shows 'superuser' Users
+    * role... shows Users role
     """
-    if security.check_permision(current_user, bottom_perm="is_staff"):
+    if security.check_permision(current_user, bottom_perm="staff"):
         return user_logic.get_all_users(
             db=db,
             limit=limit,
             page=page,
             reverse_sort=latest_first,
             find_by_email=email,
-            find_staff=staff,
-            find_superuser=superuser,
+            role=role,
         )
-
-
-# ---------------------------------------------------------------------------------------
-# create_user
-# ---------------------------------------------------------------------------------------
-
-
-@router.post(
-    "/users",
-    response_model=user_order_s.UserFullShow,
-    status_code=status.HTTP_201_CREATED,
-)
-def create_user(
-    schema: user_order_s.UserCreate,
-    db: Session = Depends(get_db),
-):
-    """
-    Create user.
-
-        DON'T need authentication and special permissions.
-
-    By default user will have permission:
-    * is_staff = False
-    * is_superuser = False
-    """
-    return user_logic.create_user(db=db, schema=schema)
 
 
 # ---------------------------------------------------------------------------------------
@@ -93,14 +64,14 @@ def create_user(
 def get_user_by_email(
     email: str,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(security.get_current_user),
+    current_user: dict = Depends(security.auth_access_wrapper),
 ):
     """
     Get full information about user by email
 
         Need authentication and special permissions!
 
-        Only a user who has ('is_staff', 'is_superuser') can get access.
+        Only a user who has role='staff' or role='admin' can get access.
     """
     if security.check_permision(current_user, bottom_perm="is_staff"):
         return user_logic.get_one_user(
@@ -123,16 +94,16 @@ def change_user_permission_by_email_by_superuser(
     email: str,
     schema: user_order_s.UserPermissionChange,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(security.get_current_user),
+    current_user: dict = Depends(security.auth_access_wrapper),
 ):
     """
     Change user permission by email
 
         Need authentication and special permissions!
 
-        Only a user who has ('is_superuser') can get access.
+        Only a user who has role='admin' can get access.
     """
-    if security.check_permision(current_user, bottom_perm="is_superuser"):
+    if security.check_permision(current_user, bottom_perm="admin"):
         return user_logic.change_user_by_superuser(
             email=email,
             schema=schema,
@@ -152,7 +123,7 @@ def change_user_permission_by_email_by_superuser(
 def delete_user_by_id(
     user_id: int,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(security.get_current_user),
+    current_user: dict = Depends(security.auth_access_wrapper),
 ):
     """
     Delete user by email.
@@ -161,7 +132,7 @@ def delete_user_by_id(
 
         If it's your own email you can delete your account.
 
-        Also a users who has ('is_staff', 'is_superuser') can delete as well.
+        Also a users who has role='staff' or role='admin' can delete as well.
     """
     # permision check inside user_logic.delete_user()
     return user_logic.delete_user(
@@ -183,7 +154,7 @@ def delete_user_by_id(
 )
 def read_current_user_info(
     db: Session = Depends(get_db),
-    current_user: dict = Depends(security.get_current_user),
+    current_user: dict = Depends(security.auth_access_wrapper),
 ):
     """
     Get full information about current user.
@@ -192,7 +163,7 @@ def read_current_user_info(
 
         Only owner can see this info.
 
-    But users who has special permissions as ('is_staff', 'is_superuser')
+    But users who has special permissions as role='staff' or role='admin'
     also can see your info but using "/users/{email}"
     """
     return user_logic.get_one_user(
@@ -214,7 +185,7 @@ def read_current_user_info(
 def change_user_info_by_himself(
     schema: user_order_s.UserChangeByUserHimself,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(security.get_current_user),
+    current_user: dict = Depends(security.auth_access_wrapper),
 ):
     """
     Change current user main information.

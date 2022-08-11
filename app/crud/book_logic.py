@@ -3,8 +3,11 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from fastapi.encoders import jsonable_encoder
 
-from app.database.db import Base
 from app.models import store_m
+
+# ---------------------------------------------------------------------------------------
+# create_book
+# ---------------------------------------------------------------------------------------
 
 
 def create_book(
@@ -60,17 +63,30 @@ def create_book(
     return new_item
 
 
+# ---------------------------------------------------------------------------------------
+# get_all_book
+# ---------------------------------------------------------------------------------------
+
+
 def get_all_book(
     db: Session,
     limit: int,
     page: int,
     reverse_sort: bool,
-    is_active: bool,
+    book_active: bool,
     search_by_autor_id: int,
     search_by_category_id: int,
+    categories_active: bool,
 ):
     skip = (page - 1) * limit
+
     db_items = db.query(store_m.Book)
+
+    # shows book only with active Category (Category.is_active == True)
+    if categories_active is not None:
+        db_items = db_items.join(store_m.Category).filter(
+            store_m.Category.is_active.is_(categories_active)
+        )
 
     # sorting
     if reverse_sort:
@@ -91,10 +107,15 @@ def get_all_book(
         )
 
     # is Book active
-    if is_active is not None:
-        db_items = db_items.filter(store_m.Book.is_active == is_active)
+    if book_active is not None:
+        db_items = db_items.filter(store_m.Book.is_active == book_active)
 
     return db_items.limit(limit).offset(skip).all()
+
+
+# ---------------------------------------------------------------------------------------
+# update_book
+# ---------------------------------------------------------------------------------------
 
 
 def update_book(

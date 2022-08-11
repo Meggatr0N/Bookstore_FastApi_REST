@@ -28,7 +28,11 @@ def get_all_books(
     ),
     limit: int = 10,
     page: int = 1,
-    active: bool | None = None,
+    active_books: bool = Query(True, description="books active or inactive"),
+    active_categories: bool = Query(
+        True,
+        description="books whose category active or inactive",
+    ),
     autor: int | None = Query(None, description="Search books by author id"),
     category: int
     | None = Query(None, description="Search books by category id"),
@@ -42,7 +46,8 @@ def get_all_books(
     You can use query parameters to get some specific information as:
 
     * latest_first...   True shows list from end to start.
-    * active... shows active or inattive books
+    * book_active... shows active or inattive books
+    * categories_active... shows books whose category is active or inactive
     * autor... shows books with an author who has this id
     * category... shows books with category who have this id
     """
@@ -51,10 +56,41 @@ def get_all_books(
         page=page,
         limit=limit,
         reverse_sort=latest_first,
-        is_active=active,
+        book_active=active_books,
         search_by_autor_id=autor,
         search_by_category_id=category,
+        categories_active=active_categories,
     )
+
+
+# ---------------------------------------------------------------------------------------
+# create_book
+# ---------------------------------------------------------------------------------------
+
+
+@router.post(
+    "/books",
+    response_model=store_s.BookFullShow,
+    status_code=status.HTTP_201_CREATED,
+    tags=["Book"],
+)
+def create_book(
+    book: store_s.BookCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(security.auth_access_wrapper),
+):
+    """
+    Create book.
+
+        Need authentication and special permissions.
+
+        Only a user who has role='staff' or role='admin' can get access.
+    """
+    if security.check_permision(current_user, bottom_perm="staff"):
+        return book_logic.create_book(
+            item=book,
+            db=db,
+        )
 
 
 # ---------------------------------------------------------------------------------------
@@ -85,36 +121,6 @@ def get_book_by_id(
 
 
 # ---------------------------------------------------------------------------------------
-# create_book
-# ---------------------------------------------------------------------------------------
-
-
-@router.post(
-    "/books",
-    response_model=store_s.BookFullShow,
-    status_code=status.HTTP_201_CREATED,
-    tags=["Book"],
-)
-def create_book(
-    book: store_s.BookCreate,
-    db: Session = Depends(get_db),
-    current_user: dict = Depends(security.get_current_user),
-):
-    """
-    Create book.
-
-        Need authentication and special permissions.
-
-        Only a user who has ('is_staff', 'is_superuser') can get access.
-    """
-    if security.check_permision(current_user, bottom_perm="is_staff"):
-        return book_logic.create_book(
-            item=book,
-            db=db,
-        )
-
-
-# ---------------------------------------------------------------------------------------
 # update_book_by_id
 # ---------------------------------------------------------------------------------------
 
@@ -129,16 +135,16 @@ def update_book_by_id(
     book_id: int,
     book: store_s.BookChange,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(security.get_current_user),
+    current_user: dict = Depends(security.auth_access_wrapper),
 ):
     """
     Update book by ID.
 
         Need authentication and special permissions.
 
-        Only a user who has ('is_staff', 'is_superuser') can get access.
+        Only a user who has role='staff' or role='admin' can get access.
     """
-    if security.check_permision(current_user, bottom_perm="is_staff"):
+    if security.check_permision(current_user, bottom_perm="staff"):
         return book_logic.update_book(
             item_id=book_id,
             db=db,
@@ -159,16 +165,16 @@ def update_book_by_id(
 def delete_book_by_id(
     book_id: int,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(security.get_current_user),
+    current_user: dict = Depends(security.auth_access_wrapper),
 ):
     """
     Delete book by ID.
 
         Need authentication and special permissions.
 
-        Only a user who has ('is_staff', 'is_superuser') can get access.
+        Only a user who has role='staff' or role='admin' can get access.
     """
-    if security.check_permision(current_user, bottom_perm="is_staff"):
+    if security.check_permision(current_user, bottom_perm="staff"):
         return author_category_logic.delete_item_by_id(
             item_id=book_id,
             db=db,
