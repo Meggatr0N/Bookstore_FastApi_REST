@@ -77,6 +77,19 @@ def refresh_access_token(
     db: Session = Depends(get_db),
     user_email: dict = Depends(security.auth_refresh_wrapper),
 ):
+    """
+    Refresh access token form.
+
+        Need authentication with refresh token.
+
+    Using a refresh token requires to refresh access token.
+    (expire in 10080 minutes = 7 days)
+
+    If refresh token is valid.
+    *Reading user info from database
+    *Creating token with new data.
+    *Returns new access token (expire in 15 minutes).
+    """
     user = (
         db.query(user_m.User).filter(user_m.User.email == user_email).first()
     )

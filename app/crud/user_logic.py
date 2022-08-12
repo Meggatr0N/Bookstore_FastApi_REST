@@ -21,6 +21,10 @@ def get_all_users(
     find_by_email: str,
     role: str,
 ):
+    """
+    This function get all users.
+    All steps described.
+    """
     skip = (page - 1) * limit
     db_items = db.query(user_m.User)
 
@@ -52,6 +56,10 @@ def get_one_user(
     email: str,
     db: Session,
 ):
+    """
+    This function get one user by id.
+    All steps described.
+    """
     # user existence check
     user = db.query(user_m.User).filter(user_m.User.email == email).first()
 
@@ -73,6 +81,10 @@ def change_user_by_superuser(
     schema: BaseModel,
     db: Session,
 ):
+    """
+    This function change user info.
+    All steps described.
+    """
     # user existence check
     user_to_update = (
         db.query(user_m.User).filter(user_m.User.email == email).first()
@@ -91,6 +103,7 @@ def change_user_by_superuser(
         if value is not None and user_to_update.__dict__[keyy] != value:
             data_to_save[keyy] = value
 
+    # if we have valid, new data we updating
     if data_to_save:
         db.query(user_m.User).filter(user_m.User.email == email).update(
             data_to_save
@@ -115,6 +128,10 @@ def change_user_by_himself(
     schema: BaseModel,
     db: Session,
 ):
+    """
+    This function change user by himself.
+    All steps described.
+    """
     # user existence check
     user_to_update = (
         db.query(user_m.User).filter(user_m.User.email == email).first()
@@ -207,6 +224,10 @@ def delete_user(
     db: Session,
     current_user: Base,
 ):
+    """
+    This function deleting user by himself or by company staff.
+    All steps described.
+    """
     # permision check
     if user_id == current_user.id or security.check_permision(
         current_user, bottom_perm="staff"

@@ -1,7 +1,15 @@
 from pydantic import BaseModel, Field, EmailStr
 
+# ---------------------------------------------------------------------------------------
+# CategoryCreate
+# ---------------------------------------------------------------------------------------
+
 
 class CategoryCreate(BaseModel):
+    """
+    Used to create a general info about category
+    """
+
     name: str
     is_active: bool = True
 
@@ -14,7 +22,16 @@ class CategoryCreate(BaseModel):
         }
 
 
+# ---------------------------------------------------------------------------------------
+# CategoryChange
+# ---------------------------------------------------------------------------------------
+
+
 class CategoryChange(BaseModel):
+    """
+    Used to change a general info about category
+    """
+
     name: str | None
     is_active: bool | None
 
@@ -27,7 +44,16 @@ class CategoryChange(BaseModel):
         }
 
 
+# ---------------------------------------------------------------------------------------
+# AuthorCreate
+# ---------------------------------------------------------------------------------------
+
+
 class AuthorCreate(BaseModel):
+    """
+    Used to create a general info about author
+    """
+
     name: str
     email: EmailStr = Field(...)
 
@@ -40,7 +66,16 @@ class AuthorCreate(BaseModel):
         }
 
 
+# ---------------------------------------------------------------------------------------
+# AuthorChange
+# ---------------------------------------------------------------------------------------
+
+
 class AuthorChange(BaseModel):
+    """
+    Used to change a general info about author
+    """
+
     name: str | None
     email: EmailStr | None
 
@@ -53,7 +88,16 @@ class AuthorChange(BaseModel):
         }
 
 
+# ---------------------------------------------------------------------------------------
+# BookCreate
+# ---------------------------------------------------------------------------------------
+
+
 class BookCreate(BaseModel):
+    """
+    Used to create a general info about book
+    """
+
     name: str
     price: float
     description: str
@@ -76,7 +120,16 @@ class BookCreate(BaseModel):
         }
 
 
+# ---------------------------------------------------------------------------------------
+# BookChange
+# ---------------------------------------------------------------------------------------
+
+
 class BookChange(BaseModel):
+    """
+    Used to change a general info about category
+    """
+
     name: str | None
     price: float | None
     description: str | None
@@ -99,7 +152,16 @@ class BookChange(BaseModel):
         }
 
 
-class CategorySmallShow(BaseModel):
+# ---------------------------------------------------------------------------------------
+# CategoryShortShow
+# ---------------------------------------------------------------------------------------
+
+
+class CategoryShortShow(BaseModel):
+    """
+    Used to show id + general info about category
+    """
+
     id: int
     name: str
     is_active: bool
@@ -115,7 +177,16 @@ class CategorySmallShow(BaseModel):
         }
 
 
+# ---------------------------------------------------------------------------------------
+# AuthorInListShow
+# ---------------------------------------------------------------------------------------
+
+
 class AuthorInListShow(BaseModel):
+    """
+    Used to show id + general info about author in list of authors
+    """
+
     id: int
     name: str
     email: str
@@ -131,7 +202,16 @@ class AuthorInListShow(BaseModel):
         }
 
 
-class AuthorSmallShow(BaseModel):
+# ---------------------------------------------------------------------------------------
+# AuthorShortShow
+# ---------------------------------------------------------------------------------------
+
+
+class AuthorShortShow(BaseModel):
+    """
+    Used to show info about author inside book's info
+    """
+
     id: int
     name: str
 
@@ -145,7 +225,16 @@ class AuthorSmallShow(BaseModel):
         }
 
 
-class BookSmallShow(BaseModel):
+# ---------------------------------------------------------------------------------------
+# BookShortShow
+# ---------------------------------------------------------------------------------------
+
+
+class BookShortShow(BaseModel):
+    """
+    Used to show info about book inside author's or category's info
+    """
+
     id: int
     name: str
     year_of_publication: int
@@ -161,11 +250,20 @@ class BookSmallShow(BaseModel):
         }
 
 
+# ---------------------------------------------------------------------------------------
+# CategoryFullShow
+# ---------------------------------------------------------------------------------------
+
+
 class CategoryFullShow(BaseModel):
+    """
+    Used to show full info about category
+    """
+
     id: int
     name: str
     is_active: bool
-    books: list[BookSmallShow] = []
+    books: list[BookShortShow] = []
 
     class Config:
         orm_mode = True
@@ -190,11 +288,20 @@ class CategoryFullShow(BaseModel):
         }
 
 
+# ---------------------------------------------------------------------------------------
+# AuthorFullShow
+# ---------------------------------------------------------------------------------------
+
+
 class AuthorFullShow(BaseModel):
+    """
+    Used to show full info about author
+    """
+
     id: int
     name: str
     email: str
-    books: list[BookSmallShow] = []
+    books: list[BookShortShow] = []
 
     class Config:
         orm_mode = True
@@ -219,15 +326,24 @@ class AuthorFullShow(BaseModel):
         }
 
 
+# ---------------------------------------------------------------------------------------
+# BookFullShow
+# ---------------------------------------------------------------------------------------
+
+
 class BookFullShow(BaseModel):
+    """
+    Used to show full info about book
+    """
+
     id: int
     name: str
     price: float
     description: str
     year_of_publication: int
     is_active: bool
-    author: AuthorSmallShow | None
-    category: CategorySmallShow | None
+    author: AuthorShortShow | None
+    category: CategoryShortShow | None
 
     class Config:
         orm_mode = True

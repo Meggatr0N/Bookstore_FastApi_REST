@@ -2,7 +2,16 @@ from pydantic import BaseModel, Field, EmailStr, constr
 from datetime import date
 
 
+# ---------------------------------------------------------------------------------------
+# UserCreate
+# ---------------------------------------------------------------------------------------
+
+
 class UserCreate(BaseModel):
+    """
+    Used to create new user
+    """
+
     fullname: str
     email: EmailStr = Field(...)
     password: constr(min_length=8)
@@ -11,28 +20,71 @@ class UserCreate(BaseModel):
     class Config:
         schema_extra = {
             "example": {
-                "fullname": "Example User",
-                "email": "exampleuser@gmail.com",
-                "password": "123user123",
-                "passwordConfirm": "123user123",
+                "fullname": "User",
+                "email": "user@gmail.com",
+                "password": "qwerty12",
+                "passwordConfirm": "qwerty12",
             }
         }
 
 
-class OrderCreate(BaseModel):
+# ---------------------------------------------------------------------------------------
+# OrderItemCreate
+# ---------------------------------------------------------------------------------------
+
+
+class OrderItemCreate(BaseModel):
+    """
+    Used inside order as item of order.
+    """
+
     book_id: int
     quantity: int
 
     class Config:
         schema_extra = {
             "example": {
-                "book_id": "1234",
-                "quantity": "8",
+                "book_id": "0",
+                "quantity": "1",
             }
         }
 
 
+# ---------------------------------------------------------------------------------------
+# OrderItemShow
+# ---------------------------------------------------------------------------------------
+
+
+class OrderItemShow(BaseModel):
+    """
+    Used to show order's items inside order.
+    """
+
+    id: int
+    book_id: int
+    quantity: int
+
+    class Config:
+        orm_mode = True
+        schema_extra = {
+            "example": {
+                "id": "41",
+                "book_id": "1",
+                "quantity": "5",
+            },
+        }
+
+
+# ---------------------------------------------------------------------------------------
+# OrderUpdateByStaff
+# ---------------------------------------------------------------------------------------
+
+
 class OrderUpdateByStaff(BaseModel):
+    """
+    Used to update the service information of an order.
+    """
+
     paid: bool | None
     delivery_date: date | None
     complete: bool | None
@@ -47,20 +99,16 @@ class OrderUpdateByStaff(BaseModel):
         }
 
 
-class OrderUpdateByUserHimself(BaseModel):
-    book_id: int | None
-    quantity: int | None
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "book_id": "12",
-                "quantity": "4",
-            }
-        }
+# ---------------------------------------------------------------------------------------
+# UserPermissionChange
+# ---------------------------------------------------------------------------------------
 
 
 class UserPermissionChange(BaseModel):
+    """
+    Used to change user permissions by admin
+    """
+
     role: str
 
     class Config:
@@ -71,7 +119,16 @@ class UserPermissionChange(BaseModel):
         }
 
 
+# ---------------------------------------------------------------------------------------
+# UserChangeByUserHimself
+# ---------------------------------------------------------------------------------------
+
+
 class UserChangeByUserHimself(BaseModel):
+    """
+    Used to change user credentials by user himself
+    """
+
     fullname: str | None
     email: str | None
     old_password: str | None
@@ -81,8 +138,8 @@ class UserChangeByUserHimself(BaseModel):
     class Config:
         schema_extra = {
             "example": {
-                "fullname": "Example User",
-                "email": "exampleuser@gmail.com",
+                "fullname": "User",
+                "email": "user@gmail.com",
                 "old_password": "12345678",
                 "new_password": "87654321",
                 "new_passwordConfirm": "87654321",
@@ -90,7 +147,16 @@ class UserChangeByUserHimself(BaseModel):
         }
 
 
-class UserSmallShow(BaseModel):
+# ---------------------------------------------------------------------------------------
+# UserShortShow
+# ---------------------------------------------------------------------------------------
+
+
+class UserShortShow(BaseModel):
+    """
+    Used to show user main short info inside other models
+    """
+
     id: int
     fullname: str
     email: str
@@ -100,92 +166,53 @@ class UserSmallShow(BaseModel):
         schema_extra = {
             "example": {
                 "id": "7",
-                "fullname": "Example User",
-                "email": "exampleuser@gmail.com",
+                "fullname": "User",
+                "email": "user@gmail.com",
             }
         }
 
 
-class UserInListOfUsersShow(BaseModel):
-    id: int
-    fullname: str
-    email: str
-    role: str
-
-    class Config:
-        orm_mode = True
-        schema_extra = {
-            "example": {
-                "id": "7",
-                "fullname": "Example User",
-                "email": "exampleuser@gmail.com",
-                "role": "user",
-            }
-        }
-
-
-class OrderSmallShow(BaseModel):
-    id: int
-    total_price: float
-    paid: bool | None = False
-    delivery_date: date | None
-    complete: bool | None = False
-
-    class Config:
-        orm_mode = True
-        schema_extra = {
-            "example": {
-                "id": "12",
-                "total_price": "0.00",
-                "paid": "False",
-                "delivery_date": "2022-01-01",
-                "complete": "False",
-            }
-        }
+# ---------------------------------------------------------------------------------------
+# UserFullShow
+# ---------------------------------------------------------------------------------------
 
 
 class UserFullShow(BaseModel):
+    """
+    Used to show full user info
+    """
+
     id: int
     fullname: str
     email: str
     role: str
-    orders: list[OrderSmallShow] = []
 
     class Config:
         orm_mode = True
         schema_extra = {
             "example": {
                 "id": "7",
-                "fullname": "Example User",
-                "email": "exampleuser@gmail.com",
+                "fullname": "User",
+                "email": "user@gmail.com",
                 "role": "user",
-                "orders": [
-                    {
-                        "id": "12",
-                        "total_price": "450.00",
-                        "paid": "True",
-                        "delivery_date": "2022-01-01",
-                        "complete": "False",
-                    },
-                    {
-                        "id": "13",
-                        "total_price": "1000.00",
-                        "paid": "True",
-                        "delivery_date": "2022-01-01",
-                        "complete": "False",
-                    },
-                ],
             }
         }
 
 
-class OrderFullShow(BaseModel):
+# ---------------------------------------------------------------------------------------
+# OrderShortShow
+# ---------------------------------------------------------------------------------------
+
+
+class OrderShortShow(BaseModel):
+    """
+    Used to show short main order info
+    """
+
     id: int
-    book_id: int
-    quantity: int
+    date_placed: date
     total_price: float
     paid: bool
-    customer: UserSmallShow | None
     delivery_date: date | None
     complete: bool
 
@@ -193,40 +220,107 @@ class OrderFullShow(BaseModel):
         orm_mode = True
         schema_extra = {
             "example": {
-                "id": "12",
-                "book_id": "12",
-                "quantity": "4",
-                "total_price": "0.00",
+                "id": "2",
+                "date_placed": "2000/01/01",
+                "total_price": "99.97",
                 "paid": "False",
-                "customer": {
-                    "id": "7",
-                    "fullname": "Example User",
-                    "email": "exampleuser@gmail.com",
-                },
-                "delivery_date": "2022-01-01",
+                "delivery_date": "2000/01/01",
                 "complete": "False",
             }
         }
 
-        # {
-        #     "id": 2,
-        #     "total_price": 5.97,
-        #     "customer": {
-        #         "id": 1,
-        #         "fullname": "artem",
-        #         "email": "artem@gmail.com",
-        #     },
-        #     "paid": "False",
-        #     "delivery_date": null,
-        #     "complete": "False",
-        #     "order_items": [
-        #         {
-        #             "book_id": 3,
-        #             "quantity": 3,
-        #         },
-        #         {
-        #             "book_id": 3,
-        #             "quantity": 3,
-        #         },
-        #     ],
-        # }
+
+# ---------------------------------------------------------------------------------------
+# OrderFullShow
+# ---------------------------------------------------------------------------------------
+
+
+class OrderFullShow(BaseModel):
+    """
+    Used to show full order info
+    """
+
+    id: int
+    date_placed: date
+    total_price: float
+    customer: UserShortShow
+    paid: bool
+    delivery_date: date | None
+    complete: bool
+
+    line_items: list[OrderItemShow] | None = []
+
+    class Config:
+        orm_mode = True
+        schema_extra = {
+            "example": {
+                "id": 2,
+                "date_placed": "2000/01/01",
+                "total_price": "99.97",
+                "customer": {
+                    "id": 1,
+                    "fullname": "user",
+                    "email": "user@gmail.com",
+                },
+                "paid": "False",
+                "delivery_date": "2000/01/01",
+                "complete": "False",
+                "order_items": [
+                    {
+                        "id": "41",
+                        "book_id": "3",
+                        "quantity": "5",
+                    },
+                    {
+                        "id": "42",
+                        "book_id": "1",
+                        "quantity": "2",
+                    },
+                ],
+            }
+        }
+
+
+# ---------------------------------------------------------------------------------------
+# OrdersForUserShow
+# ---------------------------------------------------------------------------------------
+
+
+class OrdersForUserShow(BaseModel):
+    """
+    Used to show full order info inside list for user
+    """
+
+    id: int
+    date_placed: date
+    total_price: float
+    paid: bool
+    delivery_date: date | None
+    complete: bool
+
+    line_items: list[OrderItemShow] | None = []
+
+    class Config:
+        orm_mode = True
+        schema_extra = {
+            "example": {
+                "id": 2,
+                "date_placed": "2000/01/01",
+                "total_price": "99.97",
+                "paid": "False",
+                "delivery_date": "2000/01/01",
+                "complete": "False",
+                "order_items": [
+                    {
+                        "id": "41",
+                        "book_id": "1",
+                        "quantity": "2",
+                    },
+                    {
+                        "id": "42",
+                        "book_id": "2",
+                        "quantity": "2",
+                    },
+                ],
+            }
+        }

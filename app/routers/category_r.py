@@ -17,7 +17,7 @@ router = APIRouter(tags=["Category"])
 
 @router.get(
     "/categories",
-    response_model=list[store_s.CategorySmallShow],
+    response_model=list[store_s.CategoryShortShow],
     status_code=status.HTTP_200_OK,
 )
 def get_all_categories(
@@ -165,3 +165,42 @@ def delete_category_by_id(
             db=db,
             item_model=store_m.Category,
         )
+
+
+# ---------------------------------------------------------------------------------------
+# show_all_books_of_category_by_id
+# ---------------------------------------------------------------------------------------
+
+
+@router.get(
+    "/category-books/{category_id}",
+    response_model=list[store_s.BookShortShow],
+    status_code=status.HTTP_200_OK,
+)
+def show_all_books_of_category_by_id(
+    category_id: int,
+    db: Session = Depends(get_db),
+    latest_first: bool = Query(
+        True, description="Get the latest added books (from end to start)"
+    ),
+    limit: int = 10,
+    page: int = 1,
+    active: bool | None = None,
+):
+    """
+    Get all category's books short info by category id.
+
+        DON'T need authentication and special permissions.
+
+    You can use query parameters to get some specific information as:
+
+    * latest_first...   True shows list from end to start.
+    """
+    return author_category_logic.show_all_books_of_related_model(
+        item_id=category_id,
+        db=db,
+        page=page,
+        limit=limit,
+        related_model="category",
+        latest_first=latest_first,
+    )

@@ -14,6 +14,10 @@ def create_book(
     item: BaseModel,
     db: Session,
 ):
+    """
+    This function create book.
+    All steps described.
+    """
     db_item = (
         db.query(store_m.Book).filter(store_m.Book.name == item.name).first()
     )
@@ -28,32 +32,42 @@ def create_book(
 
     # check if the data exists at all
     if "author_id" in request_data:
-        author_exception = HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Author not found!",
-        )
-        bookauthor = (
-            db.query(store_m.Author)
-            .filter(store_m.Author.id == request_data["author_id"])
-            .first()
-        )
-        if not bookauthor:
-            raise author_exception
+        if request_data["author_id"] is not None:
+            # author existence check
+            bookauthor = (
+                db.query(store_m.Author)
+                .filter(store_m.Author.id == request_data["author_id"])
+                .first()
+            )
+            if not bookauthor:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Author not found!",
+                )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="You must enter an author!",
+            )
 
     if "category_id" in request_data:
-        category_exception = HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Category not found!",
-        )
-
-        bookcategory = (
-            db.query(store_m.Category)
-            .filter(store_m.Category.id == request_data["category_id"])
-            .first()
-        )
-
-        if not bookcategory:
-            raise category_exception
+        if request_data["category_id"] is not None:
+            # category existence check
+            bookcategory = (
+                db.query(store_m.Category)
+                .filter(store_m.Category.id == request_data["category_id"])
+                .first()
+            )
+            if not bookcategory:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Category not found!",
+                )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="You must enter category!",
+            )
 
     new_item = store_m.Book(**request_data)
 
@@ -78,6 +92,10 @@ def get_all_book(
     search_by_category_id: int,
     categories_active: bool,
 ):
+    """
+    This function get all books.
+    All steps described.
+    """
     skip = (page - 1) * limit
 
     db_items = db.query(store_m.Book)
@@ -88,7 +106,7 @@ def get_all_book(
             store_m.Category.is_active.is_(categories_active)
         )
 
-    # sorting
+    # sorting (reverse by default)
     if reverse_sort:
         db_items = db_items.order_by(store_m.Book.id.desc())
     else:
@@ -123,6 +141,10 @@ def update_book(
     db: Session,
     schema: BaseModel,
 ):
+    """
+    This function for update book by id.
+    All steps described.
+    """
     book_to_update = (
         db.query(store_m.Book).filter(store_m.Book.id == item_id).first()
     )
@@ -172,7 +194,7 @@ def update_book(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Category not found!",
             )
-
+    # if we have data to save and all data is valid, updating
     if data_to_save:
         db.query(store_m.Book).filter(store_m.Book.id == item_id).update(
             data_to_save

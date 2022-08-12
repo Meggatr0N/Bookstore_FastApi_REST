@@ -16,7 +16,7 @@ router = APIRouter(tags=["Users"])
 
 @router.get(
     "/users",
-    response_model=list[user_order_s.UserInListOfUsersShow],
+    response_model=list[user_order_s.UserShortShow],
     status_code=status.HTTP_200_OK,
 )
 def get_all_users(
@@ -148,7 +148,7 @@ def delete_user_by_id(
 
 
 @router.get(
-    "/users/me/",
+    "/me/",
     response_model=user_order_s.UserFullShow,
     status_code=status.HTTP_200_OK,
 )
@@ -178,7 +178,7 @@ def read_current_user_info(
 
 
 @router.put(
-    "/users/me/",
+    "/me/",
     response_model=user_order_s.UserFullShow,
     status_code=status.HTTP_202_ACCEPTED,
 )

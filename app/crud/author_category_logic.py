@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from fastapi.encoders import jsonable_encoder
 
 from app.database.db import Base
+from app.models import store_m
 
 # ---------------------------------------------------------------------------------------
 # create_item
@@ -15,6 +16,11 @@ def create_item(
     db: Session,
     item_model: Base,
 ):
+    """
+    This function to create an database item.
+    It's general function.
+    All steps described.
+    """
     db_item = db.query(item_model).filter(item_model.name == item.name).first()
 
     # item existence check
@@ -24,7 +30,7 @@ def create_item(
             detail=f"{item_model.__name__} with this name already exists",
         )
 
-    # create item
+    # get data from schema and create item
     new_item_in_data = jsonable_encoder(item)
     new_item = item_model(**new_item_in_data)
 
@@ -48,6 +54,11 @@ def get_all_items(
     active: bool = None,
     find_by_email: str = None,
 ):
+    """
+    This function get all items.
+    It's general function.
+    All steps described.
+    """
     skip = (page - 1) * limit
     db_items = db.query(item_model)
 
@@ -78,6 +89,11 @@ def get_item_by_id(
     db: Session,
     item_model: Base,
 ):
+    """
+    This function get item by id.
+    It's general function.
+    All steps described.
+    """
     item = db.query(item_model).filter(item_model.id == item_id).first()
 
     # item existence check
@@ -101,6 +117,11 @@ def update_item_by_id(
     schema: BaseModel,
     item_model: Base,
 ):
+    """
+    This function update item by id.
+    It's general function.
+    All steps described.
+    """
     item_to_update = (
         db.query(item_model).filter(item_model.id == item_id).first()
     )
@@ -149,6 +170,11 @@ def delete_item_by_id(
     db: Session,
     item_model: Base,
 ):
+    """
+    This function delete item by id.
+    It's general function.
+    All steps described.
+    """
     item_to_delete = (
         db.query(item_model).filter(item_model.id == item_id).first()
     )
@@ -163,3 +189,44 @@ def delete_item_by_id(
     db.commit()
 
     return {"detail": item_model.__name__ + " deleted successfully"}
+
+
+# ---------------------------------------------------------------------------------------
+# show_all_books_of_related_model
+# ---------------------------------------------------------------------------------------
+
+
+def show_all_books_of_related_model(
+    item_id: int,
+    db: Session,
+    latest_first: bool,
+    limit: int,
+    page: int,
+    related_model: str,
+):
+    """
+    This function get all items of related model (author's or category's).
+    It's general function.
+    All steps described.
+    """
+    skip = (page - 1) * limit
+    db_items = db.query(store_m.Book)
+
+    # find equal model to return right books
+    if related_model == "category":
+        db_items = db_items.filter(store_m.Book.category_id == item_id)
+    elif related_model == "author":
+        db_items = db_items.filter(store_m.Book.author_id == item_id)
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Wrong related model!",
+        )
+
+    # sorting
+    if latest_first:
+        db_items = db_items.order_by(store_m.Book.id.desc())
+    else:
+        db_items = db_items.order_by(store_m.Book.id)
+
+    return db_items.limit(limit).offset(skip).all()

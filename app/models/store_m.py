@@ -4,8 +4,8 @@ from sqlalchemy import (
     Boolean,
     Column,
     Text,
-    Float,
     ForeignKey,
+    Numeric,
 )
 from sqlalchemy.orm import relationship
 from app.database.db import Base
@@ -18,8 +18,6 @@ class Category(Base):
     name = Column(String(64), nullable=False, unique=True)
     is_active = Column(Boolean, default=True)
 
-    # books = relationship("Book", back_populates="category")
-
     def __repr__(self):
         return f"Category name: {self.name}"
 
@@ -31,8 +29,6 @@ class Author(Base):
     name = Column(String(64), nullable=False, unique=True)
     email = Column(String(64), nullable=False)
 
-    # books = relationship("Book", back_populates="author")
-
     def __repr__(self):
         return f"Author name: {self.name}"
 
@@ -42,20 +38,16 @@ class Book(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(128), nullable=False, unique=True)
-    price = Column(Float, nullable=False)
+    price = Column(Numeric(10, 2), nullable=False)
     description = Column(Text)
     year_of_publication = Column(Integer)
-    is_active = Column(Boolean)
+    is_active = Column(Boolean, default=True)
 
-    author_id = Column(Integer, ForeignKey("authors.id"))
-    category_id = Column(Integer, ForeignKey("categories.id"))
+    author_id = Column(Integer, ForeignKey("authors.id"), nullable=False)
+    category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
 
-    author = relationship(
-        "Author", backref="books"
-    )  # , back_populates="books")
-    category = relationship(
-        "Category", backref="books"
-    )  # , back_populates="books")
+    author = relationship("Author", backref="books")
+    category = relationship("Category", backref="books")
 
     def __repr__(self):
         return f"Book title: {self.name}"

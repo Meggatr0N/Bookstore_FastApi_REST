@@ -17,7 +17,7 @@ router = APIRouter(tags=["Orders"])
 
 @router.get(
     "/orders",
-    response_model=list[user_order_s.OrderFullShow],
+    response_model=list[user_order_s.OrderShortShow],
     status_code=status.HTTP_200_OK,
 )
 def get_all_orders(
@@ -26,10 +26,12 @@ def get_all_orders(
     owner: int | None = None,
     limit: int = 10,
     page: int = 1,
+    date_placed_from: date | None = None,
+    date_placed_to: date | None = None,
     total_min: float | None = None,
     total_max: float | None = None,
-    date_from: date | None = None,
-    date_to: date | None = None,
+    delivery_date_from: date | None = None,
+    delivery_date_to: date | None = None,
     complete: bool | None = None,
     current_user: dict = Depends(security.auth_access_wrapper),
 ):
@@ -43,12 +45,15 @@ def get_all_orders(
     You can use query parameters to get some specific information as:
     * latest_first...   True shows list  from end to start
     * owner... shows User orders by his customer_id
+    * date_placed_from and date_placed_to...
+    shows orders using borders of placed date
     * total_min and total_max... shows orders using borders of total price
-    * date_from and date_to... shows orders using borders of delivery date
+    * delivery_date_from and delivery_date_to...
+    shows orders using borders of delivery date
     * complete... shows is the order completed or not
 
 
-        Delivery date example ('2000-01-01' Year/month/day)
+        Date example ('2000-01-01' Year/month/day)
     """
     if security.check_permision(current_user, bottom_perm="staff"):
         return order_logic.get_all_orders(
@@ -59,24 +64,24 @@ def get_all_orders(
             total_min=total_min,
             total_max=total_max,
             owner=owner,
-            date_from=date_from,
-            date_to=date_to,
+            delivery_date_from=delivery_date_from,
+            delivery_date_to=delivery_date_to,
             complete=complete,
+            date_placed_from=date_placed_from,
+            date_placed_to=date_placed_to,
         )
 
 
 # ---------------------------------------------------------------------------------------
 # create_order
 # ---------------------------------------------------------------------------------------
-
-
 @router.post(
     "/orders",
     response_model=user_order_s.OrderFullShow,
     status_code=status.HTTP_201_CREATED,
 )
 def create_order(
-    order: user_order_s.OrderCreate,
+    order: list[user_order_s.OrderItemCreate],
     db: Session = Depends(get_db),
     current_user: dict = Depends(security.auth_access_wrapper),
 ):
@@ -93,6 +98,9 @@ def create_order(
     * complete... default False
 
     The part of logic described inside "PUT /orders/{order_id}"
+
+    All entered information (in the list) will add to info described
+    above in field OrderItem
     """
     return order_logic.create_item(
         item=order,
@@ -208,41 +216,84 @@ def delete_order_by_id(
     current_user: dict = Depends(security.auth_access_wrapper),
 ):
     """
-    Delete order by id.
+    Delete order by id and all related order's items.
 
         Need authentication and special permissions.
     """
     if security.check_permision(current_user, bottom_perm="staff"):
-        return author_category_logic.delete_item_by_id(
+        return order_logic.delete_order_by_id(
             item_id=order_id,
             db=db,
-            item_model=order_m.Order,
         )
 
 
 # ---------------------------------------------------------------------------------------
-# update_own_last_order_by_current_user
+# get_all_user_orders
 # ---------------------------------------------------------------------------------------
 
 
-@router.put(
-    "/orders/my-order/",
-    response_model=user_order_s.OrderFullShow,
+@router.get(
+    "/orders/my/",
+    response_model=list[user_order_s.OrdersForUserShow],
     status_code=status.HTTP_202_ACCEPTED,
 )
-def update_own_last_order_by_current_user(
-    order: user_order_s.OrderUpdateByUserHimself,
+def get_all_user_orders(
+    latest_first: bool = True,
+    limit: int = 10,
+    page: int = 1,
     db: Session = Depends(get_db),
     current_user: dict = Depends(security.auth_access_wrapper),
 ):
     """
-    Change last order of current_user by himself.
+    Get all orders of current_user by himself.
+
+        Need authentication and DON'T need special permissions.
+
+        Only user who created it - can see it.
+    """
+    return order_logic.get_all_user_orders(
+        latest_first=latest_first,
+        limit=limit,
+        page=page,
+        db=db,
+        current_user=current_user,
+    )
+
+
+# ---------------------------------------------------------------------------------------
+# update_own_order_by_current_user
+# ---------------------------------------------------------------------------------------
+
+
+@router.put(
+    "/orders/my/{order_id}",
+    response_model=user_order_s.OrderFullShow,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+def update_own_order_by_current_user(
+    order_id: int,
+    order: list[user_order_s.OrderItemCreate],
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(security.auth_access_wrapper),
+):
+    """
+    Change order by id of current_user by himself.
 
         Need authentication and DON'T need special permissions.
 
         Only user who created it - can change it.
+
+    It means that he can change order's items in the order
+    (You can enter a list of order's items)
+    *book_id
+    *quantity
+
+    When you will enter new information it will save with this
+    order and recalculate total price of order.
+    It's also means that previos order's items in order will be deleted.
     """
-    return order_logic.update_last_order_by_user(
+    return order_logic.update_order_by_id_by_user(
+        order_id=order_id,
         db=db,
         schema=order,
         current_user=current_user,

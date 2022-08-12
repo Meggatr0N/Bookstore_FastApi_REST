@@ -164,3 +164,42 @@ def delete_author_by_id(
             db=db,
             item_model=store_m.Author,
         )
+
+
+# ---------------------------------------------------------------------------------------
+# show_all_books_of_author
+# ---------------------------------------------------------------------------------------
+
+
+@router.get(
+    "/author-books/{author_id}",
+    response_model=list[store_s.BookShortShow],
+    status_code=status.HTTP_200_OK,
+)
+def show_all_books_of_author_by_id(
+    author_id: int,
+    db: Session = Depends(get_db),
+    latest_first: bool = Query(
+        True, description="Get the latest added books (from end to start)"
+    ),
+    limit: int = 10,
+    page: int = 1,
+    active: bool | None = None,
+):
+    """
+    Get all author's books short info by author id.
+
+        DON'T need authentication and special permissions.
+
+    You can use query parameters to get some specific information as:
+
+    * latest_first...   True shows list from end to start.
+    """
+    return author_category_logic.show_all_books_of_related_model(
+        item_id=author_id,
+        db=db,
+        page=page,
+        limit=limit,
+        related_model="author",
+        latest_first=latest_first,
+    )

@@ -14,4 +14,4 @@ class User(Base):
     password = Column(String)
     role = Column(String, default="user")
 
-    orders = relationship("Order", back_populates="customer")
+    orders = relationship("Order", backref="customer")

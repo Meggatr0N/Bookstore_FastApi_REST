@@ -15,6 +15,10 @@ def create_user(
     schema: BaseModel,
     db: Session,
 ):
+    """
+    This function creating a user.
+    All steps described.
+    """
     user = (
         db.query(user_m.User)
         .filter(user_m.User.email == schema.email.lower())
@@ -34,7 +38,7 @@ def create_user(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Passwords do not match",
         )
-
+    # creating
     new_user = user_m.User(
         fullname=schema.fullname,
         email=EmailStr(schema.email.lower()),
@@ -56,6 +60,12 @@ def verify_login(
     schema: BaseModel,
     db: Session,
 ):
+    """
+    This function to verify a login.
+    If user is exist and passwords is matching we return access token
+    and refresh token to access to endpoinds.
+    All steps described.
+    """
     enter_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Incorrect email or password",
