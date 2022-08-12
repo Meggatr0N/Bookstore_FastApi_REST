@@ -130,14 +130,14 @@ def create_item(
             )
 
         # create new order
-        new_order = order_m.OrderItem(
+        new_order_item = order_m.OrderItem(
             order_id=new_order.id,
             book_id=part_of_item.book_id,
             quantity=part_of_item.quantity,
         )
         # adding each order's item price to Order's total price
         total_price += book_db.price * part_of_item.quantity
-        db.add(new_order)
+        db.add(new_order_item)
 
     # updating Order's total price
     db.query(order_m.Order).filter(order_m.Order.id == new_order.id).update(

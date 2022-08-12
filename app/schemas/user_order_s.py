@@ -248,7 +248,7 @@ class OrderFullShow(BaseModel):
     delivery_date: date | None
     complete: bool
 
-    line_items: list[OrderItemShow] | None = []
+    order_items: list[OrderItemShow] | None = []
 
     class Config:
         orm_mode = True
@@ -298,7 +298,7 @@ class OrdersForUserShow(BaseModel):
     delivery_date: date | None
     complete: bool
 
-    line_items: list[OrderItemShow] | None = []
+    order_items: list[OrderItemShow] | None = []
 
     class Config:
         orm_mode = True
