@@ -15,3 +15,5 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 
 # poetry shell
 # uvicorn app.main:app --reload
+# pytest -v
+# pytest --cov

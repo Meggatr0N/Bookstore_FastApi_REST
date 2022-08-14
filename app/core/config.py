@@ -4,7 +4,7 @@ from pydantic import BaseSettings, PostgresDsn, validator
 
 class Settings(BaseSettings):
     # url settings
-    API_V1_STR: str = ""  # "/api/v1"
+    API_V1_STR: str = "/api/v1"  # "/api/v1"
 
     # jwt / authentication
     SECRET_JWT_KEY: str
@@ -17,6 +17,12 @@ class Settings(BaseSettings):
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
     POSTGRES_DB: str
+
+    # Postgress test launch
+    TEST_POSTGRES_SERVER: str
+    TEST_POSTGRES_USER: str
+    TEST_POSTGRES_PASSWORD: str
+    TEST_POSTGRES_DB: str
 
     SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = None
 

@@ -2,12 +2,10 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from fastapi import Depends, HTTPException, status, Security
-from sqlalchemy.orm import Session
+from fastapi import HTTPException, status, Security
 
 from app.schemas import auth_s
 from app.core import settings
-from app.database.dependb import get_db
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -31,7 +29,8 @@ def get_hashed_password(password: str):
 
 def verify_password(plain_password: str, hashed_password: str):
     """
-    Function to get password from login form and matching with with password in database
+    Function to get password from login form and matching with
+    password in database
     """
     return pwd_context.verify(plain_password, hashed_password)
 
@@ -151,7 +150,6 @@ def decode_access_token(access_token: str):
 
 def decode_refresh_token(
     refresh_token: str,
-    db: Session = Depends(get_db),
 ):
     """
     Function to decode a refresh token.
@@ -184,16 +182,16 @@ def decode_refresh_token(
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        token__from_email: str = payload.get("email")
+        email_from_token: str = payload.get("email")
 
         # check if data exist
-        if token__from_email is None:
+        if email_from_token is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Could not validate credentials",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        return token__from_email
+        return email_from_token
 
     except JWTError:
         raise HTTPException(

@@ -7,7 +7,8 @@
 __pycache__/
 .vscode
 .mypy_cache
-
+.pytest_cache
+.coverage
 
 # Files for copied code
 trash.py

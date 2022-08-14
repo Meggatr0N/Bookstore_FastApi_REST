@@ -50,6 +50,11 @@ POSTGRES_SERVER=localhost
 POSTGRES_USER=*youruser*
 POSTGRES_PASSWORD=*password*
 POSTGRES_DB=*name_of_database*
+# For JWT tokens
+ACCESS_TOKEN_EXPIRES_MINUTES=*minutes* #minutes
+REFRESH_TOKEN_EXPIRES_MINUTES=*minutes* # minutes
+SECRET_JWT_KEY=*long string* # (use this command to generate key *openssl rand -hex 32*)
+JWT_ALGORITHM=*type*
 ```
 
 #### 8. Launch our server:

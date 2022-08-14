@@ -134,12 +134,14 @@ def delete_user_by_id(
 
         Also a users who has role='staff' or role='admin' can delete as well.
     """
-    # permision check inside user_logic.delete_user()
-    return user_logic.delete_user(
-        user_id=user_id,
-        db=db,
-        current_user=current_user,
-    )
+    # permision check
+    if user_id == current_user.id or security.check_permision(
+        current_user, bottom_perm="staff"
+    ):
+        return user_logic.delete_user(
+            user_id=user_id,
+            db=db,
+        )
 
 
 # ---------------------------------------------------------------------------------------

@@ -149,6 +149,13 @@ def change_user_by_himself(
             data_to_update[keyy] = value
 
     if data_to_update:
+        if "fullname" in data_to_update:
+            db.query(user_m.User).filter(user_m.User.email == email).update(
+                {
+                    "fullname": data_to_update["fullname"],
+                }
+            )
+
         # check the entered data, it should include 3 types of passwords
         if any(
             [
@@ -200,10 +207,27 @@ def change_user_by_himself(
                                 "password": new_password_to_db,
                             }
                         )
-        else:
-            db.query(user_m.User).filter(user_m.User.email == email).update(
-                data_to_update
+        # check if user with new email is exist
+        if "email" in data_to_update:
+            user_in_db = (
+                db.query(user_m.User)
+                .filter(user_m.User.email == data_to_update["email"])
+                .first()
             )
+            if user_in_db:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="New email is already exist",
+                )
+            else:
+                db.query(user_m.User).filter(
+                    user_m.User.email == email
+                ).update(
+                    {
+                        "email": data_to_update["email"],
+                    }
+                )
+
         db.commit()
         db.refresh(user_to_update)
         return user_to_update
@@ -222,27 +246,23 @@ def change_user_by_himself(
 def delete_user(
     user_id: int,
     db: Session,
-    current_user: Base,
 ):
     """
     This function deleting user by himself or by company staff.
     All steps described.
     """
-    # permision check
-    if user_id == current_user.id or security.check_permision(
-        current_user, bottom_perm="staff"
-    ):
-        # user existence check
-        user_to_delete = (
-            db.query(user_m.User).filter(user_m.User.id == user_id).first()
+
+    # user existence check
+    user_to_delete = (
+        db.query(user_m.User).filter(user_m.User.id == user_id).first()
+    )
+    if not user_to_delete:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
         )
-        if not user_to_delete:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found",
-            )
 
-        db.delete(user_to_delete)
-        db.commit()
+    db.delete(user_to_delete)
+    db.commit()
 
-        return {"detail": "User deleted successfully"}
+    return {"detail": "User deleted successfully"}

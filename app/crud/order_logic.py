@@ -402,6 +402,7 @@ def delete_order_by_id(
         )
 
     db.delete(item_to_delete)
+    db.commit()
     # delete all related order's items
     delete_previous_order_items = order_m.OrderItem.__table__.delete().where(
         order_m.OrderItem.order_id == item_id
