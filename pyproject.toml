@@ -16,6 +16,7 @@ python-jose = "^3.3.0"
 python-multipart = "^0.0.5"
 pydantic = {extras = ["email"], version = "^1.9.1"}
 fastapi-jwt-auth = {extras = ["asymmetric"], version = "^0.5.0"}
+alembic = "^1.8.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
