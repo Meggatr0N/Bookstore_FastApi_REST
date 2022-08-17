@@ -13,7 +13,18 @@ app = FastAPI()
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 
-# poetry shell
-# uvicorn app.main:app --reload
-# pytest -v
-# pytest --cov
+# poetry shell                      launch virtual enviroment
+# uvicorn app.main:app --reload     launch project
+# pytest -v                         launch tests
+# pytest --cov                      to see how many percents of
+#                                   code is coverage by tests
+
+# create a database. here is a
+# generator for all database's tables for this project
+# BUT! You need to launch project and when database will be created,
+# comment this 2 lines of code below
+# (it will generate only if database was empty)
+
+# from app.gen import data_generator
+
+# data_generator()

@@ -174,7 +174,7 @@ def delete_category_by_id(
 
 @router.get(
     "/category-books/{category_id}",
-    response_model=list[store_s.BookShortShow],
+    response_model=list[store_s.BookFullShow],
     status_code=status.HTTP_200_OK,
 )
 def show_all_books_of_category_by_id(

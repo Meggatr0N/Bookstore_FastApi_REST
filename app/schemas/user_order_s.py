@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, EmailStr, constr
 from datetime import date
-
+from fastapi import Query
 
 # ---------------------------------------------------------------------------------------
 # UserCreate
@@ -39,7 +39,7 @@ class OrderItemCreate(BaseModel):
     """
 
     book_id: int
-    quantity: int
+    quantity: int = Query(ge=1)
 
     class Config:
         schema_extra = {

@@ -173,7 +173,7 @@ def delete_author_by_id(
 
 @router.get(
     "/author-books/{author_id}",
-    response_model=list[store_s.BookShortShow],
+    response_model=list[store_s.BookFullShow],
     status_code=status.HTTP_200_OK,
 )
 def show_all_books_of_author_by_id(
